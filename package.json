@@ -1,0 +1,12 @@
+{
+  "name": "fitness-ai-v2-cloud-render-supabase",
+  "version": "2.7.0",
+  "type": "module",
+  "scripts": {
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "build:client": "npm --prefix client run build",
+    "start": "npm --prefix server start"
+  }
+}

@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+:root{
+  --bg:#06040b;
+  --panel:#11101a;
+  --panel2:#171528;
+  --line:#28233d;
+  --text:#f6f2ff;
+  --muted:#a99fbd;
+  --muted2:#6f6680;
+  --purple:#8043bc;
+  --purple2:#533fc1;
+  --green:#80bc43;
+  --danger:#ff6b6b;
+  --shadow:0 22px 70px rgba(83,63,193,.25);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Outfit,system-ui,sans-serif}
+button,input,textarea{font:inherit} button{cursor:pointer} button:disabled{opacity:.55;cursor:not-allowed}
+.shell{min-height:100vh;max-width:560px;margin:0 auto;background:
+  radial-gradient(circle at 12% -3%,rgba(128,67,188,.55),transparent 34%),
+  radial-gradient(circle at 95% 0,rgba(128,188,67,.22),transparent 30%),
+  linear-gradient(180deg,#07040e 0%,#090713 50%,#050308 100%);position:relative;padding-bottom:94px;overflow-x:hidden}
+.topbar{position:sticky;top:0;z-index:5;background:rgba(7,4,14,.80);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.07);padding:18px 18px 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.eyebrow{font-size:11px;color:var(--green);font-weight:900;letter-spacing:3px;text-transform:uppercase}.topbar h1{margin:4px 0 0;font-size:25px;letter-spacing:-.03em}.datebox{text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end}.datebox input{background:#11101a;border:1px solid var(--line);color:var(--text);border-radius:13px;padding:8px 10px;font-size:12px}.datebox b{color:var(--green)}.providerBadge{display:block;font-size:10px;color:#d6cfff;background:rgba(128,67,188,.18);border:1px solid rgba(128,67,188,.38);border-radius:999px;padding:4px 8px;text-align:center}
+main{padding:16px 18px}.fade{animation:fade .25s ease}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.panel{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.09);border-radius:24px;padding:16px;margin-bottom:14px;box-shadow:0 14px 45px rgba(0,0,0,.22)}.panel h2{margin:0 0 7px;font-size:18px;letter-spacing:-.02em}.muted{color:var(--muted);font-size:13px;line-height:1.55}.errorPanel{margin:24px}.panel button,.photoCard button,.trainingHero button{background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;border:0;border-radius:15px;padding:12px 14px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 10px 28px rgba(83,63,193,.25)}.panel input,.panel textarea{width:100%;background:#090711;border:1px solid var(--line);border-radius:14px;color:var(--text);padding:12px;margin:8px 0}.panel textarea{min-height:88px;resize:vertical}
+.coachPage{min-height:calc(100vh - 170px);display:flex;flex-direction:column}.dailyStrip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.dailyStrip div{background:rgba(17,16,26,.82);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px 8px;min-height:76px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px}.dailyStrip svg{color:var(--green)}.dailyStrip b{font-size:18px}.dailyStrip span{font-size:10px;color:var(--muted2)}.panelFlush{background:transparent;border:0;box-shadow:none;padding:0;margin:0}.chatBox{flex:1;overflow:auto;padding:4px 0 12px;min-height:46vh}.emptyChat{text-align:center;color:var(--muted);padding:22px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:10px}.emptyChat .orb{width:76px;height:76px;border-radius:28px;display:grid;place-items:center;background:linear-gradient(135deg,var(--purple),var(--purple2));box-shadow:var(--shadow)}.emptyChat h2{margin:2px 0 0;color:var(--text);font-size:23px}.emptyChat p{margin:0;max-width:420px;line-height:1.55;font-size:14px}.promptGrid{display:grid;gap:8px;width:100%;margin-top:10px}.promptGrid button{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.10);color:#e8e0ff;border-radius:16px;padding:12px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px}.bubble{max-width:88%;padding:13px 15px;border-radius:20px;margin:9px 0;line-height:1.5;font-size:14px;white-space:pre-wrap}.bubble.user{margin-left:auto;background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;border-bottom-right-radius:5px}.bubble.assistant{background:rgba(17,16,26,.96);border:1px solid rgba(255,255,255,.08);color:#e7e1f0;border-bottom-left-radius:5px}.composer{position:sticky;bottom:94px;display:flex;gap:8px;align-items:flex-end;background:rgba(8,5,14,.78);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.10);border-radius:24px;padding:9px;box-shadow:0 -10px 40px rgba(0,0,0,.25)}.composer textarea{flex:1;min-height:52px;max-height:140px;resize:vertical;border:0;outline:0;background:transparent;color:var(--text);padding:10px}.composer textarea::placeholder{color:#766d86}.composer button{width:48px;height:48px;border-radius:17px;border:0;background:linear-gradient(135deg,var(--green),#a7db67);color:#10150a;display:grid;place-items:center;font-weight:900}
+.macroHero{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.ringCard{background:rgba(17,16,26,.86);border:1px solid rgba(255,255,255,.09);border-radius:24px;padding:16px;text-align:center;position:relative;overflow:hidden}.ringCard:before{content:"";position:absolute;inset:-50%;background:radial-gradient(circle,rgba(128,67,188,.22),transparent 42%);pointer-events:none}.ringCard svg{width:118px;height:118px;transform:rotate(-90deg);position:relative}.ringCard circle{fill:none;stroke-width:9;stroke-linecap:round}.ringCard .bg{stroke:#252036}.ringCard .fg{stroke:var(--purple);transition:.5s}.ringCard.green .fg{stroke:var(--green)}.ringText{position:absolute;top:48px;left:0;right:0}.ringText b{display:block;font-size:25px}.ringText span{font-size:11px;color:var(--muted)}.ringCard h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0;color:#ddd}.ringCard p{font-size:11px;color:var(--muted2);margin:4px 0 0}.cards2,.miniStats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.macroCard{background:rgba(17,16,26,.86);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px}.macroCard span{display:block;color:var(--muted);font-size:12px}.macroCard b{display:block;font-size:22px;margin:5px 0 2px}.macroCard small{color:var(--muted2)}.callout{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px}.callout svg{color:var(--green)}.callout button{white-space:nowrap;background:linear-gradient(135deg,var(--green),#a7db67);color:#10150a}.chips{display:grid;grid-template-columns:1fr 1fr;gap:9px}.chips button{justify-content:space-between;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:4px;background:#171528;border:1px solid rgba(255,255,255,.08);color:#eee;box-shadow:none}.chips small{color:var(--muted)}.entry{background:#0b0813;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:13px;margin:10px 0}.entryHead{display:flex;justify-content:space-between;gap:10px}.entryHead b{display:block}.entryHead span{display:block;color:var(--muted);font-size:13px;margin-top:4px}.entryHead button{background:transparent;color:var(--danger);padding:5px;border:0;box-shadow:none}.subrow{display:flex;justify-content:space-between;gap:10px;border-top:1px solid rgba(255,255,255,.07);margin-top:9px;padding-top:8px;font-size:13px;color:#cabfe0}.subrow b{white-space:nowrap;color:#f2edff}.trainingHero{background:linear-gradient(135deg,rgba(83,63,193,.95),rgba(128,67,188,.86));border-radius:26px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:flex-end;gap:14px}.trainingHero h2{font-size:28px;margin:5px 0}.trainingHero p{margin:0;color:#e2dbff;line-height:1.45}.trainingHero button{background:#fff;color:#1a1130;box-shadow:none;white-space:nowrap}.rowForm{display:grid;grid-template-columns:1fr 110px auto;align-items:end;gap:10px}.chart{color:var(--green);background:#0b0813;border-radius:18px;overflow:hidden;margin-top:12px}.chart svg{width:100%;height:auto;display:block}.list div{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 0}.list span{color:var(--muted)}.list.compact div:nth-child(n+6){display:none}.profileForm label{display:block;color:var(--muted);font-size:13px;margin:8px 0}.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.photoGrid{display:grid;grid-template-columns:1fr;gap:14px}.photoCard{background:rgba(17,16,26,.86);border:1px solid rgba(255,255,255,.09);border-radius:22px;overflow:hidden}.photoCard img{width:100%;display:block;max-height:520px;object-fit:cover}.photoMeta{display:flex;justify-content:space-between;padding:12px 14px;color:var(--muted)}.photoCard p{padding:0 14px;color:#ded7ea;line-height:1.5}.photoCard button{margin:0 14px 14px}.loader{padding:70px 20px;text-align:center;color:var(--muted)}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;background:rgba(9,7,19,.94);backdrop-filter:blur(18px);border-top:1px solid rgba(255,255,255,.08);display:flex;padding:8px 8px 16px;z-index:10}nav button{flex:1;background:transparent;border:0;color:#6b6378;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0;border-radius:16px}nav button span{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.4px}nav button.active{color:#fff;background:linear-gradient(180deg,rgba(128,67,188,.24),rgba(83,63,193,.10))}nav button.active svg{color:var(--green)}
+@media(max-width:430px){.dailyStrip{grid-template-columns:1fr 1fr}.cards2,.miniStats,.chips,.formGrid{grid-template-columns:1fr}.rowForm{grid-template-columns:1fr}.callout{grid-template-columns:1fr}.trainingHero{flex-direction:column;align-items:flex-start}.macroHero{grid-template-columns:1fr 1fr}.topbar h1{font-size:22px}.composer{bottom:90px}}
+
+/* ===== v2.5 layout/progress additions ===== */
+:root{--bottom-nav-height:94px}
+.shell{height:100dvh;min-height:100dvh;max-width:560px;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;padding-bottom:0}
+.topbar{flex-shrink:0}
+main{flex:1;min-height:0;overflow:hidden;padding:16px 18px var(--bottom-nav-height)}
+main>section{height:100%;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.coachPage{height:100%;min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.dailyStrip{flex-shrink:0;margin-bottom:0}
+.chatBox.coachScroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:4px 0 18px;-webkit-overflow-scrolling:touch}
+.composer{position:relative!important;bottom:auto!important;flex-shrink:0;z-index:20;display:flex;gap:8px;align-items:flex-end;background:rgba(8,5,14,.92);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.10);border-radius:24px;padding:9px;box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+.composer textarea{flex:1;min-height:52px;max-height:120px;resize:none;border:0;outline:0;background:transparent;color:var(--text);padding:10px}.composer button{flex-shrink:0;width:48px;height:48px;border-radius:17px;border:0;background:linear-gradient(135deg,var(--green),#a7db67);color:#10150a;display:grid;place-items:center;font-weight:900}
+nav{height:var(--bottom-nav-height);z-index:50}
+.progressMini{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:stretch;flex-shrink:0}.progressMini div{background:rgba(17,16,26,.82);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px}.progressMini b{display:block;font-size:13px}.progressMini span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.progressMini button{border:0;border-radius:16px;padding:0 12px;background:linear-gradient(135deg,var(--green),#a7db67);color:#10150a;font-weight:900}.progressReply{max-width:100%;flex-shrink:0;margin:0}.analyticsGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.exerciseProgressList,.foodCatalogList,.settingsReadout{display:grid;gap:8px;margin-top:12px}.exerciseProgressItem,.foodCatalogList div,.settingsReadout span{background:#0b0813;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:11px;display:flex;flex-direction:column;gap:3px}.exerciseProgressItem span,.exerciseProgressItem small,.settingsReadout span{color:var(--muted);font-size:12px}.foodCatalogList div{display:grid;grid-template-columns:1fr auto auto;align-items:center}.foodCatalogList button,.entryActions button{box-shadow:none!important;padding:6px 8px!important;border-radius:10px!important;background:rgba(255,255,255,.06)!important;color:var(--muted)!important}.entryActions{display:flex;align-items:center;gap:6px}.backupActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.backupActions button{flex:1;min-width:160px}
+@media(max-width:430px){:root{--bottom-nav-height:90px}.progressMini{grid-template-columns:1fr 1fr}.progressMini button{min-height:42px}.analyticsGrid{grid-template-columns:1fr}.foodCatalogList div{grid-template-columns:1fr}.entryHead{align-items:flex-start}.entryActions{flex-direction:column}.chatBox.coachScroll{padding-bottom:12px}}
+.providerButtons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.providerButtons button{box-shadow:none!important;padding:10px!important;text-transform:uppercase;font-size:12px}
+@media(max-width:430px){.providerButtons{grid-template-columns:1fr 1fr}}
+
+/* PWA + device sync */
+.syncPanel {
+  background: rgba(128, 67, 188, .10);
+  border: 1px solid rgba(128, 67, 188, .28);
+  border-radius: 18px;
+  padding: 14px;
+  margin: 12px 0;
+}
+.syncPanel h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+.syncPanel input {
+  width: 100%;
+  background: #090711;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--text);
+  padding: 12px;
+  margin: 8px 0;
+}
+@supports (padding: max(0px)) {
+  nav { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+}
+
+/* ===== FINAL MOBILE/PWA SCROLL FIX FOR CLOUD BUILD ===== */
+html, body, #root { height: 100%; min-height: 100%; overflow: hidden; }
+body { position: fixed; inset: 0; width: 100%; }
+.shell { height: 100dvh; min-height: 100dvh; max-height: 100dvh; max-width: 560px; margin: 0 auto; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; padding-bottom: 0 !important; }
+.topbar { position: relative !important; top: auto !important; z-index: 20; flex-shrink: 0; }
+main { min-height: 0 !important; height: auto !important; overflow: hidden !important; padding: 12px 14px !important; }
+main > section { height: 100%; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
+.coachPage { height: 100%; min-height: 0; overflow: hidden !important; display: grid !important; grid-template-rows: auto auto 1fr auto; gap: 10px; }
+.dailyStrip { flex-shrink: 0; margin-bottom: 0 !important; }
+.chatBox.coachScroll { min-height: 0 !important; height: auto !important; flex: unset !important; overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch; padding: 4px 0 18px !important; }
+.composer { position: relative !important; bottom: auto !important; z-index: 30; flex-shrink: 0; margin: 0 !important; display: flex; gap: 8px; align-items: flex-end; background: rgba(8, 5, 14, 0.96) !important; backdrop-filter: blur(18px); border: 1px solid rgba(255, 255, 255, 0.10); border-radius: 22px; padding: 8px !important; box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.25); }
+.composer textarea { flex: 1; min-height: 46px !important; max-height: 110px !important; resize: none !important; border: 0; outline: 0; background: transparent; color: var(--text); padding: 9px; }
+.composer button { width: 46px !important; height: 46px !important; flex-shrink: 0; }
+nav { position: relative !important; left: auto !important; bottom: auto !important; transform: none !important; width: 100%; max-width: 560px; height: auto !important; min-height: 78px; flex-shrink: 0; z-index: 50; padding: 8px 8px calc(10px + env(safe-area-inset-bottom)) !important; }
+@media (max-width: 430px) {
+  main { padding: 10px 12px !important; }
+  .dailyStrip { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .dailyStrip div { min-height: 58px; padding: 7px 5px; border-radius: 14px; }
+  .dailyStrip b { font-size: 14px; }
+  .dailyStrip span { font-size: 8px; }
+  .dailyStrip svg { width: 15px; height: 15px; }
+  .bubble { max-width: 92%; font-size: 13px; padding: 11px 13px; }
+  .composer { border-radius: 20px; }
+  nav button span { font-size: 9px; }
+}

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: fitness-ai-backend
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.0
+      - key: CORS_ALLOW_ALL
+        value: true
+      - key: DATABASE_PROVIDER
+        value: supabase
+      - key: SUPABASE_STORAGE_BUCKET
+        value: progress-photos
+      - key: AI_PROVIDER
+        value: groq
+      - key: AI_FALLBACK_PROVIDER
+        value: mock
