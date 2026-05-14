@@ -61,6 +61,42 @@ const STARTER_PROMPTS = [
   "Šta da jedem večeras ako mi fali protein?"
 ];
 
+
+function normalizeForCoach(text = "") {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function looksLikeLogInput(text = "") {
+  const t = normalizeForCoach(text);
+  if (!t) return false;
+
+  const isReset = /\b(reset|resetuj|restartuj|ocisti|obrisi|izbrisi|ponisti)\b/.test(t);
+  if (isReset) return true;
+
+  const hasQuestionMark = text.includes("?");
+  const startsLikeQuestion = /^(sta|kako|koliko|zasto|da li|jel|je l|moze li|treba li|sme li|koji|koja|koje)\b/.test(t);
+  const asksForAdvice = /\b(preporuci|predlozi|objasni|pomozi|savet|savjet|mislis|treba|bolje|najbolje|zasto|kako)\b/.test(t);
+
+  const hasFoodAmount = /\b\d+(?:[.,]\d+)?\s?(g|gr|gram|grama|kg|kcal|cal|kalorij|ml|l)\b/.test(t);
+  const hasMealVerb = /\b(jeo|jela|pojeo|pojela|popio|popila|uzeo|uzela|dorucak|rucak|vecera|uzina)\b/.test(t);
+  const hasKnownFood = /\b(piletin|curetin|junetin|tuna|tunjevin|whey|protein|tost|hleb|jogurt|mleko|banana|pirinac|pirinac|pasta|ovs|jaje|jaja|krompir|pasulj|salat|pljeskavic|prasetin)\b/.test(t);
+
+  const hasWorkoutTerms = /\b(bench|benc|cucanj|squat|rdl|deadlift|mrtvo|lat|row|veslanje|curl|potisak|trcanje|trcao|set|serij|ponavlj|reps|kg)\b/.test(t);
+  const hasWorkoutNumbers = /\b\d+\s?(x|kg|km|min|h)\b|\b\d+\s+\d+\s?x\s?\d+\b/.test(t);
+  const hasWeightLog = /\b\d{2,3}(?:[.,]\d)?\s?kg\b/.test(t) && /\b(jutros|tezina|tezak|vaga|vagao|vagala)\b/.test(t);
+
+  const looksLikeMealLog = (hasFoodAmount && hasKnownFood) || (hasMealVerb && hasKnownFood);
+  const looksLikeWorkoutLog = hasWorkoutTerms && hasWorkoutNumbers;
+  const looksLikeDataLog = hasWeightLog || looksLikeMealLog || looksLikeWorkoutLog;
+
+  if (!looksLikeDataLog) return false;
+  return !(hasQuestionMark || startsLikeQuestion || asksForAdvice);
+}
+
 export default function App() {
   const [tab, setTab] = useState("coach");
   const [date, setDate] = useState(todayISO());
@@ -291,27 +327,40 @@ export default function App() {
     const clean = text?.trim();
     if (!clean || aiBusy) return;
 
+    const isLogInput = looksLikeLogInput(clean);
+    const statusText = options.status || (isLogInput
+      ? "Prepoznajem unos i ažuriram dnevnik..."
+      : "Razmišljam kao coach i gledam tvoj kontekst...");
+
     options.clear?.();
     setAiBusy(true);
     setChat(c => [
       ...c,
       { role: "user", text: clean },
-      { role: "assistant", text: options.status || "Razmišljam, analiziram i ažuriram dnevnik..." }
+      { role: "assistant", text: statusText }
     ]);
 
     try {
-      const res = await apiFetch(`${API}/ai/log`, {
+      const recentHistory = chat
+        .filter(m => m.text && !m.text.startsWith("Greška:"))
+        .slice(-10)
+        .map(m => ({ role: m.role, text: m.text }));
+
+      const res = await apiFetch(`${API}${isLogInput ? "/ai/log" : "/ai/chat"}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: clean, date })
+        body: JSON.stringify(isLogInput
+          ? { text: clean, date }
+          : { message: clean, date, history: recentHistory })
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.details || json.error || "AI error");
 
-      setChat(c => [...c.slice(0, -1), { role: "assistant", text: json.reply || "Ažurirao sam dnevnik." }]);
-      await load(date);
+      const fallbackReply = isLogInput ? "Ažurirao sam dnevnik." : "Evo mog odgovora.";
+      setChat(c => [...c.slice(0, -1), { role: "assistant", text: json.reply || fallbackReply }]);
+      if (isLogInput || json.state) await load(date);
     } catch (err) {
-      setChat(c => [...c.slice(0, -1), { role: "assistant", text: `Greška: ${err.message}. Ako Groq/Gemini ne radi ili je limit potrošen, fallback može biti mock.` }]);
+      setChat(c => [...c.slice(0, -1), { role: "assistant", text: `Greška: ${err.message}. Proveri AI provider/API key na backendu. Ako je limit potrošen, aplikacija može da koristi mock fallback.` }]);
     } finally {
       setAiBusy(false);
     }

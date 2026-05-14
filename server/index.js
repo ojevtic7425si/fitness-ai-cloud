@@ -422,6 +422,65 @@ async function getCoachContext(owner_hash, date) {
   return JSON.stringify({ profile: s.profile, date, today: { totals: s.totals, workouts: s.workouts.map(w => ({ type: w.type, exercises: w.exercises })) }, latestWeight: s.latestWeight, memories: s.memories, seven, thirty }, null, 2);
 }
 
+function buildCoachSystemPrompt(context) {
+  return `Ti si privatni AI fitness coach unutar aplikacije za praćenje treninga, hrane, težine i napretka.
+
+Odgovaraj ISKLJUČIVO na srpskom jeziku, prirodno, direktno i konkretno. Tvoj cilj je da korisnik dobije koristan sledeći korak, ne generičnu motivaciju.
+
+KONTEKST IZ APLIKACIJE:
+${context}
+
+Kako da koristiš kontekst:
+- Ako korisnik pita za ishranu, gledaj današnje kalorije/protein, cilj kalorija/proteina i preferencije. Predloži konkretne opcije.
+- Ako korisnik pita za trening, daj konkretne vežbe, serije, ponavljanja, pauze i tehničke cue-ove kada je korisno.
+- Ako korisnik pita za težinu/napredak, gledaj trend 7 i 30 dana. Ne paniči zbog jednog dana; objasni vodu, glikogen, so, varenje i upalu mišića.
+- Ako korisnik traži šta da radi danas, spoji trening, kalorije, protein i oporavak u kratak plan.
+- Ako nema dovoljno podataka, postavi najviše jedno kratko pitanje, ali prvo daj najbolji mogući savet iz dostupnog konteksta.
+
+Pravila kvaliteta:
+- Ne izmišljaj podatke koje nemaš.
+- Ne govori "kao AI" i ne piši dugačke eseje.
+- Ne vraćaj JSON u chat endpointu; vrati normalan tekst spreman za prikaz korisniku.
+- Struktura odgovora: 1 kratak zaključak + konkretni koraci. Koristi bullet-e samo ako stvarno pomažu.
+- Ako korisnik traži unos u dnevnik, objasni mu da može da napiše npr. "300g piletine i 4 tosta" i aplikacija će to sačuvati.
+
+Bezbednost:
+- Ne dijagnostikuj bolesti i ne prepisuj lekove.
+- Ne preporučuj ekstremno gladovanje, opasne detokse ili drastično skidanje kila.
+- Za bol u grudima, nesvesticu, jaku vrtoglavicu, ozbiljnu povredu, jak ili rastući bol, poremećaj ishrane ili opasne simptome reci da se obrati lekaru/stručnjaku.
+- Za bol tokom vežbe: predloži smanjenje opterećenja, prekid bolne vežbe i proveru tehnike; ne forsirati kroz bol.`;
+}
+
+async function mockCoachReply(owner_hash, date, message = "") {
+  const s = await daySummary(owner_hash, date);
+  const seven = await analyticsForRange(owner_hash, 7, date);
+  const p = s.profile || {};
+  const t = String(message || "").toLowerCase();
+  const kcalLeft = Math.max(0, Number(p.calorie_goal || 0) - Number(s.totals.kcal || 0));
+  const proteinLeft = Math.max(0, Number(p.protein_goal || 0) - Number(s.totals.protein || 0));
+
+  if (/rdl|romanian|hamstring|zadnja loza/.test(t)) {
+    return `Za RDL: smanji kilažu dok ne osetiš zadnju ložu, kukove guraj nazad kao da zatvaraš vrata, kolena neka ostanu blago savijena, šipka ide uz noge, a spuštaš samo dok leđa ostaju neutralna. Radi 3-4 serije po 6-10 ponavljanja, pauza 2 min. Ako osećaš donja leđa više nego zadnju ložu, skrati opseg i uspori spuštanje na 2-3 sekunde.`;
+  }
+
+  if (/vecer|večer|jedem|hrana|protein|obrok|gladan|glad/.test(t)) {
+    return `Danas ti je ostalo približno ${Math.round(kcalLeft)} kcal i ${Math.round(proteinLeft)}g proteina do cilja. Dobra večera bi bila: 200-300g piletine/ćuretine + velika salata + malo pirinča/krompira ako imaš kalorija. Ako ti fali samo protein, uzmi whey sa mlekom ili 150-200g tunjevine. Ne moraš savršeno, ciljaj da protein bude blizu plana.`;
+  }
+
+  if (/tezina|težina|vaga|kilo|kg|smrs|mrš|dobio|goj/.test(t)) {
+    const change = seven?.weight?.change;
+    const trendText = change == null ? "nema još dovoljno unosa za jasan 7-dnevni trend" : `7-dnevna promena je oko ${change > 0 ? "+" : ""}${change}kg`;
+    return `Ne gledaj jedan skok na vagi kao mast. ${trendText}. Težina često skoči zbog soli, vode, glikogena, kasne večere, stresa ili upale posle treninga. Gledaj prosek 7-14 dana; ako prosek ne pada 2 nedelje, tek onda smanji 100-200 kcal ili dodaj malo kretanja.`;
+  }
+
+  if (/trening|vezb|vežb|radim|danas|plan/.test(t)) {
+    return `Za danas izaberi trening koji se uklapa u oporavak: 4-6 glavnih vežbi, 2-4 radne serije, većina serija 1-3 ponavljanja od otkaza. Ako si umoran, uradi lakši upper ili šetnju. Ako si odmoran, drži progresivno opterećenje i zapiši kilaže u aplikaciju.`;
+  }
+
+  return `Trenutno si na oko ${Math.round(s.totals.kcal)} kcal i ${Math.round(s.totals.protein)}g proteina za ${date}. Najkorisniji sledeći korak: pogodi protein cilj, ne paniči zbog dnevnih oscilacija i zapiši sledeći obrok/trening što konkretnije. Ako želiš precizniji savet, napiši da li pitaš za hranu, trening, težinu ili oporavak.`;
+}
+
+
 app.get("/api/health", (_, res) => res.json({ ok: true, database: "supabase", aiProvider: ENV_AI_PROVIDER, fallbackProvider: ENV_AI_FALLBACK_PROVIDER }));
 
 app.get("/uploads/:filename", async (req, res) => {
@@ -526,21 +585,40 @@ app.post("/api/ai/log", async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ error: "AI log failed", details: e.message }); }
 });
 
-app.post("/api/ai/chat", async (req, res) => { try { const oh = ownerHash(req); const { message, date = todayISO(), history = [] } = req.body; const context = await getCoachContext(oh, date); const messages = [{ role: "system", content: `Ti si privatni AI fitness trener. Srpski, kratko, konkretno. Kontekst:\n${context}` }, ...history.slice(-8).map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.text })), { role: "user", content: message }]; const result = await providerText(messages, oh, async () => { const s = await daySummary(oh, date); return `Mock trener: danas si na ${Math.round(s.totals.kcal)} kcal i ${Math.round(s.totals.protein)}g proteina.`; }); await sbRun(supabase.from("ai_notes").insert({ owner_hash: oh, date, user_text: message, ai_reply: result.text })); res.json({ reply: result.text, provider: result.provider, warning: result.warning }); } catch (e) { res.status(500).json({ error: "AI chat failed", details: e.message }); } });
-
-app.post("/api/photos", upload.single("photo"), async (req, res) => {
+app.post("/api/ai/chat", async (req, res) => {
   try {
     const oh = ownerHash(req);
-    const { date = todayISO(), note = "" } = req.body;
-    if (!req.file) return res.status(400).json({ error: "photo required" });
-    const ext = (req.file.originalname?.split(".").pop() || "jpg").replace(/[^a-z0-9]/gi, "").toLowerCase();
-    const filename = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}.${ext}`;
-    const storagePath = `${oh}/${filename}`;
-    const { error } = await supabase.storage.from(SUPABASE_STORAGE_BUCKET).upload(storagePath, req.file.buffer, { contentType: req.file.mimetype || "image/jpeg", upsert: false });
-    if (error) throw error;
-    const photo = await sbRun(supabase.from("progress_photos").insert({ owner_hash: oh, date, filename, original_name: req.file.originalname || "", note }).select("*").single());
-    res.json({ ok: true, photoId: photo.id, state: await daySummary(oh, date) });
-  } catch (e) { console.error(e); res.status(500).json({ error: "Upload failed", details: e.message }); }
+    const { message, date = todayISO(), history = [] } = req.body;
+    if (!message || !String(message).trim()) return res.status(400).json({ error: "message required" });
+
+    const cleanMessage = String(message).trim();
+    const context = await getCoachContext(oh, date);
+    const systemPrompt = buildCoachSystemPrompt(context);
+    const safeHistory = Array.isArray(history)
+      ? history
+          .filter(m => m && typeof m.text === "string" && m.text.trim())
+          .slice(-10)
+          .map(m => ({
+            role: m.role === "assistant" ? "assistant" : "user",
+            content: String(m.text).slice(0, 1500)
+          }))
+      : [];
+
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...safeHistory,
+      { role: "user", content: cleanMessage }
+    ];
+
+    const result = await providerText(messages, oh, async () => mockCoachReply(oh, date, cleanMessage));
+    const reply = String(result.text || "").trim() || await mockCoachReply(oh, date, cleanMessage);
+
+    await sbRun(supabase.from("ai_notes").insert({ owner_hash: oh, date, user_text: cleanMessage, ai_reply: reply }));
+    res.json({ ok: true, reply, provider: result.provider, warning: result.warning, state: await daySummary(oh, date) });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "AI chat failed", details: e.message });
+  }
 });
 
 app.post("/api/photos/:id/analyze", async (req, res) => {
