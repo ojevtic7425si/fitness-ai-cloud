@@ -157,10 +157,44 @@ async function getProfile(owner_hash) {
   return p;
 }
 
+function hasNutrition(food) {
+  return Number(food.kcal_per_100g || 0) > 0 || Number(food.kcal_per_unit || 0) > 0;
+}
+
+function normalizeFoodRow(food, owner_hash = null) {
+  return {
+    owner_hash: food.owner_hash || owner_hash,
+    name: food.name,
+    aliases: Array.isArray(food.aliases) ? food.aliases : String(food.aliases || food.name || "").split(",").map(x => x.trim()).filter(Boolean),
+    kcal_per_100g: food.kcal_per_100g ?? null,
+    protein_per_100g: food.protein_per_100g ?? null,
+    carbs_per_100g: food.carbs_per_100g ?? 0,
+    fat_per_100g: food.fat_per_100g ?? 0,
+    kcal_per_unit: food.kcal_per_unit ?? null,
+    protein_per_unit: food.protein_per_unit ?? null,
+    carbs_per_unit: food.carbs_per_unit ?? 0,
+    fat_per_unit: food.fat_per_unit ?? 0,
+    default_amount: food.default_amount ?? 100,
+    default_unit: food.default_unit ?? "g"
+  };
+}
+
 async function catalogFoods(owner_hash) {
   await seedFoodCatalog(owner_hash);
   const rows = await sbAll(supabase.from("food_catalog").select("*").eq("owner_hash", owner_hash).order("name"));
-  return rows.map(r => ({ ...r, aliases: Array.isArray(r.aliases) ? r.aliases : [] }));
+
+  // Important: older deployments may already have an incomplete/empty food_catalog row,
+  // so seedFoodCatalog() will not re-seed. Always keep the built-in catalog available
+  // and prefer DB rows only when they contain usable nutrition values.
+  const byName = new Map();
+  for (const f of FOOD_SEED) byName.set(normalizeText(f.name), normalizeFoodRow(f, owner_hash));
+  for (const r of rows) {
+    const normalized = normalizeFoodRow(r, owner_hash);
+    const key = normalizeText(normalized.name);
+    const existing = byName.get(key);
+    byName.set(key, hasNutrition(normalized) || !existing ? normalized : { ...existing, ...normalized, ...existing });
+  }
+  return [...byName.values()];
 }
 
 function normalizeText(s) {
@@ -557,7 +591,11 @@ app.post("/api/ai/log", async (req, res) => {
       parsed.weight = deterministic.weight;
       intentSet.add("weight");
     }
-    if (deterministic.meal?.items?.length && !parsed.meal?.items?.length) {
+    const parsedMealTotal = Number(parsed.meal?.total?.kcal || 0) + Number(parsed.meal?.total?.protein || 0);
+    const deterministicMealTotal = Number(deterministic.meal?.total?.kcal || 0) + Number(deterministic.meal?.total?.protein || 0);
+    if (deterministic.meal?.items?.length && (!parsed.meal?.items?.length || parsedMealTotal <= 0 || deterministicMealTotal > parsedMealTotal * 1.5)) {
+      // Deterministic catalog wins for simple known foods like "300g piletine".
+      // This prevents AI/mock replies from saving 0 kcal / 0g protein.
       parsed.meal = deterministic.meal;
       intentSet.add("food");
     }
